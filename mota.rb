@@ -24,7 +24,12 @@ import UIKit
 
 final class #{view_controller_name}: UIViewController {
     var viewModel: #{view_model_name}?
-}")
+}
+
+extension #{view_controller_name}: #{view_model_name}Delegate {
+
+}"
+)
   out_file.close
 end
 
@@ -39,6 +44,11 @@ import Foundation
 final class #{view_model_name} {
     weak var delegate: #{view_model_delegate_name}?
     var style: #{name}Style?
+    let flowCoordinator: FlowCoordinator
+
+    init(flowCoordinator: FlowCoordinator) {
+        self.flowCoordinator = flowCoordinator
+    }
 }")
 end
 
@@ -62,13 +72,18 @@ def createBuilder(header, name)
 import UIKit
 
 final class #{builder_name} {
+    let flowCoordinator: FlowCoordinator
+
+    init(flowCoordinator: FlowCoordinator) {
+        self.flowCoordinator = flowCoordinator
+    }
 
     func buildView() -> #{name}ViewController {
         let nib = UINib(nibName: \"#{name}ViewController\", bundle: nil)
         guard let viewController = nib.instantiate(withOwner: nil, options: nil).first as? #{name}ViewController else {
             fatalError(\"Expected to have view controller at this point\")
         }
-        let viewModel = #{name}ViewModel()
+        let viewModel = #{name}ViewModel(flowCoordinator: flowCoordinator)
         let style = #{name}Style()
         viewModel.style = style
         viewController.viewModel = viewModel
@@ -130,6 +145,4 @@ struct #{presentation_item_name} {
 }")
 end
 
-if ARGV.length > 0
-  generate(ARGV[0])
-end
+generate(ARGV[0])
